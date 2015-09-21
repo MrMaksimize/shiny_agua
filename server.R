@@ -7,9 +7,11 @@ library(shiny)
 shinyServer(function(input, output) {
 
   output$waterUsage <- renderPlot({
-
-    plotData <- filter(bc, cpcode == input$cpcode)
-    hist()
+    inputCpcode = input$cpcode
+    plotData <- bc
+    if (inputCpcode != "")
+      plotData <- filter(bc, cpcode == inputCpcode)
+    g <- ggplot(data = plotData, aes(x = "")
 
 
   })

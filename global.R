@@ -4,6 +4,12 @@ library(rgdal)
 
 
 #Preprocess the data
+wbill <- read.csv("./data/billing/bill_sample_complete.csv")
+# Load SHP
+com_plan <- readOGR(
+    paste0("./data/shp/community_plan_sd"),
+    layer = "community_plan_sd")
+
 bc <- wbill %>%
     mutate(billing_frequency = toupper(billing_frequency),
            loc_in_city = toupper(loc_in_city)) %>%
@@ -25,10 +31,22 @@ bc <- wbill %>%
         sewer_commodity_chg = sewer_commodity_charge
     )
 
+# com_plan has duplicates.  lets add all their stats.
+
+cp_areas <- group_by(com_plan@data, cpcode) %>%
+    summarise(acr_total = sum(acreage))
+
+cpds <- right_join(com_plan@data, cp_areas, by = 'cpcode') %>%
+    select(cpcode, cpname, acr_total) %>%
+    distinct()
+
+
+
 getCPDList <- function(inputList = TRUE) {
   cpds <- select(bc, cpname, cpcode) %>%
       arrange(cpname)
   #TODO -- because of the duplication here, need to double check bill processing.
+  # Actually - ha - it works because the join was spatial. BOOM.
   unique(cpds)
 
   if (inputList == TRUE)
