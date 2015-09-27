@@ -1,4 +1,7 @@
-source('./global.R')
+library(dplyr)
+library(lubridate)
+library(rgdal)
+library(ggplot2)
 library(shiny)
 
 #bc is now available.
