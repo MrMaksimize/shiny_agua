@@ -31,6 +31,13 @@ bc <- wbill %>%
 
 # Shiny Server!
 shinyServer(function(input, output) {
+   output$pctUsers <- renderText({
+       paste0(
+           "By the Top ",
+           input$water_top,
+           "% of Water Users."
+       )
+   })
    output$waterUsage <- renderPlot({
        wu <- reactive({
            bc %>%
