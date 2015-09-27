@@ -1,6 +1,7 @@
 library(dplyr)
 library(lubridate)
 library(rgdal)
+library(ggplot2)
 
 
 #Preprocess the data
@@ -17,18 +18,16 @@ bc <- wbill %>%
            meter_read_date = mdy(meter_read_date)) %>%
     # Remove rows that are not bi-monthly since that will skew the data:
     filter(billing_frequency == 'B') %>%
-   # Remove rows that are not in a city
+    # Remove rows that are not in a city
     filter(loc_in_city == 'IN') %>%
+    # Include single households only
+    #filter(num_units_persons == 0) %>%
     select(
         id,
         cpcode,
         cpname,
         water_cons = water_consumption,
-        sewer_cons = sewer_consumption,
-        water_base_chg = water_service_charge_base_fee,
-        water_commodity_chg = water_commodity_charge,
-        sewer_base_chg = sewer_service_charge_base_fee,
-        sewer_commodity_chg = sewer_commodity_charge
+        sewer_cons = sewer_consumption
     )
 
 # com_plan has duplicates.  lets add all their stats.
@@ -45,12 +44,16 @@ cpds <- right_join(com_plan@data, cp_areas, by = 'cpcode') %>%
 getCPDList <- function(inputList = TRUE) {
   cpds <- select(bc, cpname, cpcode) %>%
       arrange(cpname)
-  #TODO -- because of the duplication here, need to double check bill processing.
-  # Actually - ha - it works because the join was spatial. BOOM.
-  unique(cpds)
+  cpds <- unique(cpds)
 
   if (inputList == TRUE)
      setNames(cpds$cpcode, cpds$cpname)
 
+}
+
+getVarList <- function() {
+    vars <- select(bc, -id, -cpcode, -cpname)
+    vars <- names(vars)
+    setNames(vars, vars)
 }
 
